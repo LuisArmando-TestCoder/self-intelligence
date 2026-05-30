@@ -1,0 +1,16 @@
+# Generated reasoning maps / exports / caches
+runs/
+vault/
+vault-*/
+*-vault/
+.cache/
+si_cache/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+*.log
+
+# Deno
+.deno/
