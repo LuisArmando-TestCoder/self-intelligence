@@ -165,6 +165,7 @@ export interface RunOptions {
     verbose: boolean;
     cachePath?: string; // disk cache dir
     checkpointPath?: string; // incremental map dump
+    logPath?: string; // write verbose execution log here (auto: <outPath>.log)
     seedTruths?: { statement: string; source?: string; evidence?: string; confidence?: number }[];
 }
 
@@ -418,6 +419,7 @@ export class Reasoner {
     map: IntelligenceMap;
     llmCalls = 0;
     cacheHits = 0;
+    logBuffer: string[] = []; // every log line, regardless of verbose flag
     private idSeq = 0;
     private truthSeq = 0;
     private reevaluated = 0;
@@ -495,7 +497,9 @@ export class Reasoner {
     }
 
     private log(depth: number, msg: string): void {
-        if (this.opts.verbose) console.log(`${"  ".repeat(Math.max(0, depth))}${msg}`);
+        const line = `${"  ".repeat(Math.max(0, depth))}${msg}`;
+        this.logBuffer.push(line); // always capture, regardless of verbose
+        if (this.opts.verbose) console.log(line);
     }
 
     // ---- bookkeeping --------------------------------------------------------
@@ -1042,7 +1046,11 @@ Then convert to an Obsidian vault:
     const dir = outPath.includes("/") ? outPath.slice(0, outPath.lastIndexOf("/")) : ".";
     await Deno.mkdir(dir, { recursive: true });
     await Deno.writeTextFile(outPath, JSON.stringify(map, null, 2));
+    // always write execution log alongside the JSON
+    const logPath = outPath.replace(/\.json$/i, ".log");
+    await Deno.writeTextFile(logPath, reasoner.logBuffer.join("\n"));
     console.log(`\n💾 wrote ${outPath}`);
+    console.log(`📋 wrote execution log: ${logPath}`);
 
     // persist memory (active truths) for the next run
     if (args.memory) {
