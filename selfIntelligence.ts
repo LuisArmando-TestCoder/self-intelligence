@@ -917,7 +917,7 @@ function makeClient(backend: string, temperature: number): LLMClient {
 
 if (import.meta.main) {
     const args = parse(Deno.args, {
-        string: ["idea", "idea-file", "out", "backend", "max-depth", "breadth", "max-nodes", "max-llm-calls", "concurrency", "truths", "jumps", "action-paths", "vote", "retries", "dedup-threshold", "temperature", "cache", "memory"],
+        string: ["idea", "idea-file", "context", "out", "backend", "max-depth", "breadth", "max-nodes", "max-llm-calls", "concurrency", "truths", "jumps", "action-paths", "vote", "retries", "dedup-threshold", "temperature", "cache", "memory"],
         boolean: ["mock", "verbose", "no-reeval", "no-agentic", "no-dedup", "falsify", "checkpoint", "help", "quiet"],
         alias: { i: "idea", f: "idea-file", o: "out", d: "max-depth", b: "breadth", c: "concurrency", m: "mock", h: "help" },
         default: { verbose: true },
@@ -991,6 +991,20 @@ Then convert to an Obsidian vault:
     let seedTruths: RunOptions["seedTruths"] = undefined;
     if (args.memory) {
         try { seedTruths = JSON.parse(await Deno.readTextFile(args.memory as string)); } catch { seedTruths = []; }
+    }
+
+    // --context: inject free-text background knowledge as seed truths
+    // Accepts either inline text or a path to a plain-text / markdown file.
+    // Each line (or bullet) becomes one seed truth visible to the whole run.
+    if (args.context) {
+        let raw = args.context as string;
+        try { await Deno.stat(raw as string); raw = await Deno.readTextFile(raw as string); } catch { /* treat as inline text */ }
+        const lines = raw.split(/\n|(?<=[.!?])\s+/)
+            .map((l: string) => l.replace(/^[-*•>\s]+/, "").trim())
+            .filter((l: string) => l.length > 10);
+        const ctxTruths: NonNullable<RunOptions["seedTruths"]> = lines.map((l: string) => ({ statement: l, source: "user-context", confidence: 0.85 }));
+        seedTruths = [...(seedTruths ?? []), ...ctxTruths];
+        console.log(`📥 injected ${ctxTruths.length} context truths into seed`);
     }
 
     const opts: Partial<RunOptions> = {
