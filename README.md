@@ -183,5 +183,14 @@ const map = await runIntelligence(
 );
 console.log(map.actionPaths, map.recommendedPathId);
 ```
-```
 
+---
+
+## Example
+
+```
+IDEA="These six claims, taken together, constitute a framework that this book will call The Shape of the Everything." && \
+CONTEXT="The Thesis This book makes a single, unified argument composed of six interlocking claims: First: The Everything is not empty space. It is a continuous, physically self-interacting field of noise—not mathematical randomness, but physical randomness, with friction, collision, and turbulence as intrinsic properties. The digits of pi do not interact with each other. The Everything does. Second: Because this noise is physical and self-interacting, it is not purely random in the flat statistical sense. It is chaotic—governed by non-linear dynamics—and chaos mathematically tends toward structure. Not because structure is imposed from outside, but because the self-collision of infinite noise inevitably carves out stable patterns: what mathematicians call Strange Attractors. These are the seeds of everything we call cosmology. Third: What we call the Big Bang was not a beginning. It was an attractor event—a whirlpool of maximum localized order drawn from the noise, a point of minimum entropy and minimum possible states from which the universe has been disseminating back toward the noise ever since. The accelerating expansion of the universe is not a mystery requiring dark energy to explain. It is the noise reclaiming itself. Fourth: Time is not a dimension. It is not a axis on a four-dimensional coordinate system. Time is the exhaust of the sorting process—the observable artifact of the Everything actively separating into order and disorder. Where no sorting happens, there is no time. Time is the name we give to the boundary between structure and the noise. Fifth: Everything we call “alive”—stars, ecosystems, cells, brains, civilizations—is a kinetic machine: a self-sustaining engine of localized order that maintains its shape only by continuously exporting disorder back into the surrounding noise. Life is not special. It is simply a particularly elegant and recursive variety of the only trick the universe knows: sort locally, exhaust globally. Sixth: The reason the universe looks discrete, solid, and made of indivisible particles with definite properties is not because it is those things. It is because we are those things—or rather, because we are computationally bound observers who can only per7THE SHAPE OF THE EVERYTHING ceive the coarse average of a continuous, infinitely deep reality. The solidity of the world is a pixel artifact. The building blocks of matter are the edges of our resolution limit." && \
+deno run -A selfIntelligence.ts "$IDEA" --context "$CONTEXT" -o runs/output.json \
+  && deno run -A mapToObsidian.ts runs/output.json --out ./vault
+```
